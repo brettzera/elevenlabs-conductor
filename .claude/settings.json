@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ElevenLabs__agents_list",
+      "mcp__ElevenLabs__agents_get",
+      "mcp__ElevenLabs__agents_list_branches",
+      "mcp__ElevenLabs__agents_get_branch",
+      "mcp__ElevenLabs__agents_list_procedures",
+      "mcp__ElevenLabs__agents_get_procedure",
+      "mcp__ElevenLabs__agents_get_procedure_draft",
+      "mcp__ElevenLabs__agents_list_knowledge_base",
+      "mcp__ElevenLabs__agents_get_kb_document",
+      "mcp__ElevenLabs__agents_get_knowledge_size",
+      "mcp__ElevenLabs__agents_get_kb_dependents",
+      "mcp__ElevenLabs__agents_list_tools",
+      "mcp__ElevenLabs__agents_get_tool",
+      "mcp__ElevenLabs__agents_get_tool_dependents",
+      "mcp__ElevenLabs__agents_list_conversations",
+      "mcp__ElevenLabs__agents_get_conversation",
+      "mcp__ElevenLabs__agents_search_conversation_messages",
+      "mcp__ElevenLabs__agents_list_phone_numbers",
+      "mcp__ElevenLabs__agents_get_phone_number",
+      "mcp__ElevenLabs__agents_list_tests",
+      "mcp__ElevenLabs__agents_get_test",
+      "mcp__ElevenLabs__agents_list_test_runs",
+      "mcp__ElevenLabs__agents_get_test_run",
+      "mcp__ElevenLabs__agents_list_mcp_servers",
+      "mcp__ElevenLabs__agents_get_mcp_server",
+      "mcp__ElevenLabs__agents_list_mcp_server_tools",
+      "mcp__ElevenLabs__creative_list_voices"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/hooks/elevenlabs-skill-guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

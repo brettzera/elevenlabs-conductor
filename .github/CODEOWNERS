@@ -1,0 +1,8 @@
+# Every change to this repo requires Brett's review — house docs, skills,
+# and agents are Brett-gated by design (see docs/cross-client-lessons.md).
+#
+# To enforce mechanically: in GitHub repo settings, add branch protection on
+# `main` with "Require a pull request before merging" + "Require review from
+# Code Owners". With that on, GitHub itself refuses any merge to main
+# without Brett's approval, regardless of who (or what) opened the PR.
+* @brettzera
