@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+
+# Client workspaces — reports & feedback ledgers carry client PII; never commit
+clients/
+
+# Personal/local Claude Code settings — never share
+.claude/settings.local.json
+
+# macOS
+.DS_Store
