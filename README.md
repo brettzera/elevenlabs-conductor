@@ -161,6 +161,7 @@ docs/
   latency-playbook.md            Fast-by-default latency & pacing reference
   cross-client-lessons.md        Candidate observations + approved house lessons
   workflow-patterns.md           Topic-web pattern for multi-topic agents + pinned workflow API schema
+  time-of-day-routing.md         Office-status webhook runbook: n8n + ElevenLabs steps, verification, 424 troubleshooting
   architect-subagent-roadmap.md  Subagent roster and workflow design
 .github/CODEOWNERS               All changes require Brett's review
 ```
