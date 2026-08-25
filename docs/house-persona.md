@@ -12,11 +12,11 @@ where they're explicit, but the configurator must **flag the deviation**
 - **Each section carries a `Status:` line.** `Status: active` sections are
   binding baseline; `Status: unset` sections are inert scaffolding the
   configurator ignores. Flip a section to `active` when you've filled it in.
-- **This file is a house default.** Under the guardrail in
-  [cross-client-lessons.md](cross-client-lessons.md), no skill or agent may
-  edit it on its own initiative — the pipeline can only *propose* a change
-  (e.g. cross-client feedback shows a standard trait keeps causing
-  complaints) and act on Brett's explicit approval. Brett edits it directly
+- **This file is a house default, and house defaults are Brett-gated.** No
+  skill or agent may edit it on its own initiative — the pipeline can only
+  *propose* a change (a repo-change note the operator sends to Brett, per
+  the standing rules in the repo root `CLAUDE.md`, e.g. when feedback shows
+  a standard trait keeps causing complaints). Brett edits it directly
   whenever he likes; git history is the changelog.
 - **Facts still don't belong here.** This file holds tone, phrasing, and
   structural conventions — never business facts (those are per-client KB
@@ -106,7 +106,7 @@ is also a latency impression (see the playbook).
 
 ## System-prompt skeleton
 
-Status: active (workflow agents — HL-003, approved 2026-08-09; environment
+Status: active (workflow agents — the three-surface rule, approved 2026-08-09; environment
 line in item 1 and TTS-formatting reference in item 3 added per Brett's
 approval 2026-08-20, from the ElevenLabs Prompt Engineering Guide; agents
 without a workflow remain unset pending a house decision)
@@ -129,11 +129,13 @@ questioning is deferred to the workflow and its procedures
    (§ TTS-output formatting above).
 4. `# Verbatim contact details` — universal capture rules (char-by-char
    email read-back etc.), where the client line captures contacts, and
-   the carried-info rule (HL-005): anything the caller already provided
+   the carried-info rule (`workflow-patterns.md` § Surface ownership
+   rule 6): anything the caller already provided
    in this call is repeated back and confirmed — never re-asked — no
    matter which step or procedure asks for it.
 5. `# Hard rules` — universal do-not-say / guardrail layer-1 bullets
-   (HL-002) + stay-on-current-step. Two bullets are standard on every
+   (layer 1 of the three-layer set in [guardrails.md](guardrails.md)) +
+   stay-on-current-step. Two bullets are standard on every
    agent unless the client brief overrides them (source: ElevenLabs
    Prompt Engineering Guide, Guardrails block): **transparency over
    fabrication** (when the agent doesn't know or isn't certain, it says

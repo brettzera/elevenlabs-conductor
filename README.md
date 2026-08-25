@@ -73,10 +73,14 @@ live agent only when explicitly authorized):**
    write.
 4. **Evidence-driven.** Configurators only run for features the requirements
    or diagnostic reports actually call for; no upselling unused features.
-5. **Brett-gated defaults.** House defaults change only through a reviewed
-   lesson PR — see [docs/cross-client-lessons.md](docs/cross-client-lessons.md)
-   and [`.github/CODEOWNERS`](.github/CODEOWNERS).
-6. **Three-surface architecture (HL-003).** On workflow agents the prompt
+5. **Brett-gated repo, per-client memory.** The repo carries no memory:
+   everything about a client — including the client-journey `CLAUDE.md`
+   the skills maintain — lives in that client's git-ignored folder. The
+   repo's own files (docs, skills, agents, hooks) change only through
+   Brett: skills write proposed repo changes to a note in the client
+   folder for the operator to send him, and he applies and pushes them
+   himself (backstopped by [`.github/CODEOWNERS`](.github/CODEOWNERS)).
+6. **Three-surface architecture.** On workflow agents the prompt
    holds persona + universal rules and defers, verbatim, to the workflow
    ("Refer to the workflow."); nodes route and name their procedures;
    procedures carry the granular questioning — see
@@ -112,8 +116,8 @@ echo '{"prompt":"look at agent_0000example0000example0000"}' \
 That should print a JSON blob; an unrelated prompt should print nothing.
 
 **Why it exists.** On 2026-08-08 a full layer-dedup pass on a client
-agent (CL-A) was done entirely by hand — correct config work, but it skipped the
-client's feedback ledger and de-duplicated away a rule that ledger row FB-011
+agent was done entirely by hand — correct config work, but it skipped the
+client's feedback ledger and de-duplicated away a rule that a ledger row
 had placed deliberately, as a structural fix after three logged
 false-confirmation failures. The API calls were never the hard part; the
 surrounding discipline is. A per-client `CLAUDE.md` and an operator memory are
@@ -133,9 +137,9 @@ cloud environment provides everything a run needs:
   diagnoses run without permission prompts; writes still prompt.
 - **The hook** — wired via the repo's `.claude/settings.json`, active in
   every session automatically.
-- **Lesson PRs** — every session has git and GitHub access, so the
-  house-default approval channel (lesson PRs for Brett's review) runs
-  directly from any session.
+- **Repo changes stay manual** — sessions never edit the repo's own files
+  or open PRs against it. A needed repo change is written up as a note in
+  the client folder and sent to Brett, who applies and pushes it himself.
 
 One consequence to remember: session containers are **ephemeral**. Repo
 changes worth keeping (doc fixes, lessons) must be committed and pushed
@@ -159,7 +163,7 @@ docs/
   authentication.md              Connector-based auth policy (no API key) + Cal.com env-var secrets
   house-persona.md               Baseline persona traits for every agent
   latency-playbook.md            Fast-by-default latency & pacing reference
-  cross-client-lessons.md        Candidate observations + approved house lessons
+  guardrails.md                  Behavioral guardrails — the three-layer set
   workflow-patterns.md           Topic-web pattern for multi-topic agents + pinned workflow API schema
   time-of-day-routing.md         Office-status webhook runbook: n8n + ElevenLabs steps, verification, 424 troubleshooting
   architect-subagent-roadmap.md  Subagent roster and workflow design
@@ -168,9 +172,13 @@ docs/
 
 Client workspaces live in `clients/<client-slug>/` inside the repo clone,
 one folder per client/agent (per [docs/authentication.md](docs/authentication.md)). All
-per-client artifacts — requirements and feature-inventory reports, failure
-reports, feedback ledgers, test results, exported agent configs — go in that
-client's folder, never loose elsewhere. The whole `clients/` tree is
-git-ignored because those artifacts can carry client PII — which, combined
-with ephemeral session containers, means they do NOT persist across cloud
-sessions on their own; see the note under Cloud-only operation.
+per-client artifacts — the client-journey `CLAUDE.md` (the memory of that
+client: agent ids, build history, decisions, current state, which the
+skills read at run start and update at hand-off), requirements and
+feature-inventory reports, failure reports, feedback ledgers, test results,
+exported agent configs, repo-change proposal notes — go in that client's
+folder, never loose elsewhere and never in the repo's own files. The whole
+`clients/` tree is git-ignored because those artifacts can carry client
+PII — which, combined with ephemeral session containers, means they do NOT
+persist across cloud sessions on their own; see the note under Cloud-only
+operation.

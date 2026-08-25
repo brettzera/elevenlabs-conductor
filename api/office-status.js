@@ -3,9 +3,9 @@
 // Computes whether the Litster Frost office is open RIGHT NOW in
 // America/Boise and returns the result as dynamic variables in the
 // conversation_initiation_client_data shape. All date/time arithmetic
-// happens here in deterministic code — never in the agent's LLM (see
-// clients/litster-frost/hours-gate-fix-report.md and candidates C-023/C-024
-// in docs/cross-client-lessons.md for why).
+// happens here in deterministic code — never in the agent's LLM: live
+// probes showed LLM-evaluated edge conditions ignore time and even bare
+// boolean variables (see docs/time-of-day-routing.md).
 //
 // Schedule truth (must match the agent prompt's "# Time and office status"
 // section — update BOTH places, or shrink the prompt section once this
@@ -20,8 +20,8 @@ const TIMEZONE = "America/Boise";
 const OPEN_HOUR = 9; // 09:00:00 inclusive
 const CLOSE_HOUR = 19; // 19:00:00 exclusive (open through 18:59:59)
 
-// Verbatim from the agent prompt's closure list (via the extraction in
-// clients/litster-frost/hours-gate-fix-report.md, Phase A section).
+// Verbatim from the agent prompt's closure list (extraction record in the
+// client's folder).
 const CLOSURE_DATES = {
   "2026-09-07": "Labor Day",
   "2026-10-12": "Columbus Day",

@@ -41,11 +41,23 @@ agreement first — do not silently go direct.
 
 - Stage every change on a **Sandbox branch** — never write to Main, never
   merge; Brett promotes changes manually.
-- Read the client's `feedback-ledger-*.md` first — Staged/Reopened rows are
+- **All client memory lives in the client's folder, never in this repo.**
+  Every client gets their own folder, `clients/<client-slug>/` (the whole
+  `clients/` tree is git-ignored). That folder holds a `CLAUDE.md` — the
+  client-journey memory: agent ids, build history, key decisions, current
+  state, standing constraints. Read it (and the `feedback-ledger-*.md`)
+  before any work on that client — Staged/Reopened ledger rows are
   constraints, and apparent duplication may be a deliberate
-  defence-in-depth fix.
-- `## Approved house lessons` in `docs/cross-client-lessons.md` is binding;
-  candidates are signals only.
+  defence-in-depth fix — and update the `CLAUDE.md` at the end of every
+  run. Create both files on first contact if they don't exist.
+- **The repo's own files are Brett-gated.** House docs (`docs/`), skills,
+  subagents, and hooks are binding conventions, and no session, skill, or
+  agent edits them (or opens a PR against this repo) on its own. When work
+  surfaces a needed repo change — a doc is wrong, a default keeps biting —
+  write the proposal (what to change, why, evidence) to
+  `<client-folder>/repo-change-proposals.md` and tell the operator to send
+  it to Brett; Brett applies and pushes repo changes himself. No answer
+  means no.
 - **ElevenLabs auth is the connector, not a key.** All ElevenLabs access
   runs through the ElevenLabs connector MCP tools (`mcp__ElevenLabs__*`),
   authorized on the claude.ai account per `docs/authentication.md`. There

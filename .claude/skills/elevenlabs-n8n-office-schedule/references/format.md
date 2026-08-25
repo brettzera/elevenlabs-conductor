@@ -7,8 +7,8 @@ One row per client agent. All columns are strings.
 
 | Column | Format | Example |
 |---|---|---|
-| `agent_id` | ElevenLabs agent id (lookup key) | `agent_9601m01gh938ezhv3kkvwq2kv5at` |
-| `client_name` | human label only | `Litster Frost Injury Lawyers` |
+| `agent_id` | ElevenLabs agent id (lookup key) | `agent_0000example0000example0000` |
+| `client_name` | human label only | `Acme Injury Lawyers` |
 | `timezone` | IANA zone | `America/Boise` |
 | `open_days` | comma-separated full weekday names | `Monday,Tuesday,Wednesday,Thursday,Friday` |
 | `open_hour` | 24h opening hour, number-string, inclusive | `9` (opens 09:00:00) |
@@ -177,10 +177,8 @@ output for the worked example (with open_hour 9): `Wed 16:59 OPEN`,
 in action — show the requester this distinction whenever their stated
 reopen time is earlier than the client's normal opening.
 
-## Current seed row (Litster Frost, for reference)
+## Live rows
 
-- agent_id `agent_9601m01gh938ezhv3kkvwq2kv5at`, timezone `America/Boise`,
-  open_days Mon–Fri, open_hour 9, close_hour 19.
-- holiday_dates: the 27-date list through 2028 recorded in
-  `clients/litster-frost/n8n-build-prompt.md` (note: the agent prompt says
-  "25 dates" — count discrepancy flagged to Brett, unresolved).
+Per-client rows (agent ids, schedules, holiday lists) are client data: they
+live in the n8n Data Table itself and in each client’s folder
+(`clients/<client-slug>/`), never in this repo.

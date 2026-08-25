@@ -114,9 +114,10 @@ The `elevenlabs-persona-configurator` reads it before **every** draft (new
 builds and fixes alike), applies the `Status: active` sections as the
 baseline, layers the client brief on top, and flags — never silently
 accepts — a brief that contradicts an active house trait. Sections still
-`Status: unset` are inert. The file is a house default under the
-cross-client-lessons guardrail: the pipeline may propose changes to it,
-only Brett approves them, and Brett edits it directly whenever he likes.
+`Status: unset` are inert. The file is a Brett-gated house default: the
+pipeline may propose changes to it (a repo-change note the operator sends
+to Brett), only Brett approves and applies them, and Brett edits it
+directly whenever he likes.
 
 ## House rule: caller profiles drive routing, per-call checks, and tests
 
@@ -168,34 +169,27 @@ existing skills' phases:
   `Reopened`/repeat rows become constraints in the configurator dispatch briefs
   so a rebuild doesn't reintroduce a fixed complaint.
 
-## House rule: cross-client learning is two-tier, and Brett gates tier two
+## House rule: memory is per-client; the repo is Brett-gated
 
-Per-agent ledgers feed a repo-level file,
-[docs/cross-client-lessons.md](cross-client-lessons.md), with a hard wall
-between its tiers:
+The repo itself carries **no memory** — no cross-client observations, no
+client names, ids, or history. Memory is scoped per client, inside that
+client's git-ignored folder:
 
-- **Candidate observations** (tier 1, automatic): the engineer distills any
-  *generalizable* root cause — a house default, template value, or config
-  pattern that would bite other clients — into a PII-free candidate row
-  (evidence cited as client-slug + ledger FB-id only; the repo never holds
-  quotes, conversation ids, or customer data). Candidates are signals: they
-  change NOTHING about how agents are built or fixed.
-- **Approved house lessons** (tier 2, Brett-gated): when the same
-  feature-area pattern shows up at 2+ distinct clients (or one severe issue
-  is clearly caused by a house default), the skill raises a written
-  proposal — pattern, evidence, exact change, risk — through a **lesson
-  pull request**: a `lesson/<slug>` branch carrying the proposed change,
-  opened as a PR to `main` whose body is the proposal. **Brett's PR
-  approval and merge is the approval** — the only channel, for everyone,
-  Brett included; a chat "yes" never substitutes for the PR, it just means
-  Brett merges immediately. Approved lessons become binding house defaults the architect
-  folds into every relevant dispatch brief; rejected proposals (closed PRs)
-  are recorded so they aren't re-proposed without new evidence. No skill or
-  agent ever edits the Approved section, `latency-playbook.md`,
-  template/configurator defaults, or skill instructions on its own
-  initiative — no answer means no. The gate is mechanically enforced by
-  `.github/CODEOWNERS` (Brett owns everything) plus branch protection on
-  `main` requiring code-owner review — a one-time GitHub setting.
+- **`clients/<client-slug>/CLAUDE.md`** (the client-journey memory): agent
+  ids, build history, key decisions, current state, standing constraints.
+  Both skills read it at run start and update it at hand-off.
+- **`clients/<client-slug>/feedback-ledger-<agent-slug>.md`**: the
+  per-issue history (see the ledger house rule above).
+
+Changes to the repo's own files — house docs, skills, subagents, hooks —
+are **Brett-gated and manual**: no skill, agent, or session edits them or
+opens a PR against this repo. When work surfaces a needed repo change, the
+skill writes a PII-free proposal (what to change, why, evidence) to
+`<client-folder>/repo-change-proposals.md` and the operator sends it to
+Brett, who reviews, applies, and pushes repo changes himself — no answer
+means no. The gate is mechanically backstopped by `.github/CODEOWNERS`
+(Brett owns everything) plus branch protection on `main` requiring
+code-owner review — a one-time GitHub setting.
 
 ## Orchestrating skills
 

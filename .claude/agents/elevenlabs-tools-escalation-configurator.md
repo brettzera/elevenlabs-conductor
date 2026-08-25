@@ -39,7 +39,7 @@ All ElevenLabs access goes through the connector MCP tools (`mcp__ElevenLabs__�
 
 ## Every tool ships with a usage contract (ElevenLabs Prompt Engineering Guide, Tools block)
 
-A tool definition alone isn't enough — for each tool you draft, also draft its prompt-side usage contract and hand it to whoever owns that text surface (the node's topic-wide tool contract on a workflow agent per HL-003, else the persona configurator's prompt draft). Four elements per tool:
+A tool definition alone isn't enough — for each tool you draft, also draft its prompt-side usage contract and hand it to whoever owns that text surface (the node's topic-wide tool contract on a workflow agent per the three-surface rule, else the persona configurator's prompt draft). Four elements per tool:
 
 - **Usage guidelines:** when the tool fires and what contextual triggers should prompt it — including prerequisites ("only after the caller's account is verified").
 - **User visibility:** whether the agent narrates the lookup ("Let me check our system") or incorporates the result seamlessly — decide per tool, don't leave it to chance.

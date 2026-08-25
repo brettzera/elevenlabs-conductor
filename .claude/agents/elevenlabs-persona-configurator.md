@@ -39,9 +39,9 @@ All ElevenLabs access goes through the connector MCP tools (`mcp__ElevenLabs__�
 Read `docs/house-persona.md` **before every draft**. Sections marked `Status: active` are the house baseline: apply their naming, tone, do-not-say, greeting, prompt-skeleton, and language conventions to everything you draft, for new builds and fixes alike. Sections marked `Status: unset` are inert scaffolding — ignore them entirely.
 
 - **Layering:** house baseline first, then the client's brief on top. Where the brief explicitly contradicts an active house trait, the brief wins — but you MUST flag the deviation in your reply ("deviates from house persona: <trait> — per brief") rather than silently dropping the trait. Never drop an active house trait the brief didn't override.
-- **Never edit `house-persona.md` yourself.** It is a house default under the `docs/cross-client-lessons.md` guardrail: if your work suggests the standard itself is wrong, say so in your reply so the parent can raise a proposal — only Brett's explicit approval changes it.
+- **Never edit `house-persona.md` yourself.** It is a Brett-gated house default: if your work suggests the standard itself is wrong, say so in your reply so the parent can record a repo-change proposal for Brett — only Brett changes it.
 
-## House rule (HL-003): on a workflow agent, the prompt defers to the workflow
+## House rule: on a workflow agent, the prompt defers to the workflow
 
 If the target agent has a workflow (nodes beyond `start`), the system prompt carries ONLY: persona, universal speech/capture rules, universal hard rules, the closing, and a pointer section whose first sentence is verbatim **"Refer to the workflow."** (house reference wording in `docs/workflow-patterns.md` § Surface ownership — read it before drafting for any workflow agent). All flow logic, path detail, and lines of questioning belong to workflow nodes and procedures — if the brief hands you that content, draft the prompt without it and flag it in your reply as "belongs to conversation-flow / procedures, not drafted here", exactly like the facts-go-in-KB rule below. Yardstick: a workflow agent's prompt over ~5k chars almost certainly holds another surface's text.
 
