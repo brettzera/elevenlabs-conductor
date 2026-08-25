@@ -154,7 +154,10 @@ somewhere durable) so the next session can be re-seeded with them.
 
 ```
 .claude/
-  skills/    elevenlabs-architect, elevenlabs-engineer (orchestrators)
+  skills/    elevenlabs-architect, elevenlabs-engineer (orchestrators);
+             elevenlabs-create-agent, elevenlabs-n8n-office-schedule (references/tooling);
+             elevenlabs-repo-export, elevenlabs-repo-import (repo snapshot out / apply in —
+             clients/ and secrets never travel in an export)
   agents/    17 subagents (read-only analyzers + write configurators)
 hooks/
   elevenlabs-skill-guard.py      UserPromptSubmit hook — routes any ElevenLabs
