@@ -1,18 +1,46 @@
 // Office-status webhook for ElevenLabs ConvAI conversation initiation.
 //
-// Computes whether the Litster Frost office is open RIGHT NOW in
-// America/Boise and returns the result as dynamic variables in the
+// LEGACY single-schedule implementation — the current multi-client path is
+// the n8n Data-Table workflow documented in docs/time-of-day-routing.md.
+// Kept only because a deployed copy of this endpoint may still be serving
+// an agent; new clients get an n8n Data Table row instead.
+//
+// Computes whether the office is open RIGHT NOW in the configured timezone
+// and returns the result as dynamic variables in the
 // conversation_initiation_client_data shape. All date/time arithmetic
 // happens here in deterministic code — never in the agent's LLM: live
 // probes showed LLM-evaluated edge conditions ignore time and even bare
 // boolean variables (see docs/time-of-day-routing.md).
 //
-// Schedule truth (must match the agent prompt's "# Time and office status"
-// section — update BOTH places, or shrink the prompt section once this
-// endpoint is authoritative):
-//   Open: Monday–Friday, 09:00:00–18:59:59 America/Boise,
-//         except dates in CLOSURE_DATES.
-//   Fail-safe: any error → closed (is_after_hours "true").
+// How the ElevenLabs agent must be configured to consume this response —
+// the contract is identical for this endpoint and the n8n webhook (full
+// spec: docs/time-of-day-routing.md §2; stage on Sandbox, promote
+// manually):
+//   1. Conversation-initiation webhook: agent settings → "Fetch
+//      conversation initiation data from webhook" → the webhook's
+//      production URL (for n8n that is the /webhook/ path, never
+//      /webhook-test/), NO custom request headers, and the
+//      enable_conversation_initiation_client_data_from_webhook toggle ON.
+//   2. Dynamic-variable placeholders declared on the agent, with fail-safe
+//      defaults that assume CLOSED: is_open_hours "false", is_after_hours
+//      "true", is_holiday_date "false", holiday_name "", office_local_time
+//      "unavailable" — plus, on the n8n path, office_greeting (a
+//      time-neutral greeting) and next_business_day ("the next business
+//      day"). Defaults render only if the webhook fails, so never put a
+//      daypart like "Good evening" in one.
+//   3. First message: on the n8n path, exactly {{office_greeting}} — the
+//      open/closed greeting choice is the webhook's job, made before the
+//      call connects; the agent never picks a greeting.
+//   4. Prompt: a "# Time and office status (webhook-provided —
+//      authoritative)" section naming these variables as the sole source
+//      of truth for date/time/open-status. Closed-hours behavior (message
+//      taking, routing) hangs off {{is_open_hours}} in
+//      prompt/procedure/node free-text — NEVER in LLM edge conditions,
+//      which ignore these variables.
+//
+// Schedule truth: open Monday–Friday, OPEN_HOUR–CLOSE_HOUR in TIMEZONE,
+// except dates in CLOSURE_DATES. Fail-safe: any error → closed
+// (is_after_hours "true").
 //
 // No secrets, no storage. Safe to expose publicly.
 
@@ -20,8 +48,10 @@ const TIMEZONE = "America/Boise";
 const OPEN_HOUR = 9; // 09:00:00 inclusive
 const CLOSE_HOUR = 19; // 19:00:00 exclusive (open through 18:59:59)
 
-// Verbatim from the agent prompt's closure list (extraction record in the
-// client's folder).
+// Full-day closures through 2028 (standard US holidays). Keep in sync with
+// the served client's actual closure list, which lives in that client's
+// folder — never hand-compute new dates (use the
+// elevenlabs-n8n-office-schedule skill).
 const CLOSURE_DATES = {
   "2026-09-07": "Labor Day",
   "2026-10-12": "Columbus Day",
