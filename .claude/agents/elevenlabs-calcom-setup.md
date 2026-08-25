@@ -50,7 +50,7 @@ Prove the guardrails held before you report:
 
 ## Handoff draft (text only — you stage nothing)
 
-Alongside the ids, include in your reply a drafted `# Scheduling appointments` prompt section for the orchestrator to stage later. Don't invent it from scratch — the house-reviewed reference lives on the CL-A reference agent (`agent_5501kx7g6fhmeky83hsgebetmv2d`), branch "Sandbox - Cal.com booking" (`agtbrch_9401kzhd1pmvfed8qfazwbj74dgv`): read it via `agents_get` (read-only, with that `branch_id`) and adapt its `# Scheduling appointments` + `# Verbatim contact details` sections with this client's event type id and timezone. The load-bearing points to preserve:
+Alongside the ids, include in your reply a drafted `# Scheduling appointments` prompt section for the orchestrator to stage later. Don't invent it from scratch — a house-reviewed reference implementation lives on a prior client build (its agent/branch ids belong in that client's folder, not this repo; take them from your dispatch instruction, or ask the parent to supply them): read it via `agents_get` (read-only, with its `branch_id`) and adapt its `# Scheduling appointments` + `# Verbatim contact details` sections with this client's event type id and timezone. If no reference ids are supplied, draft from the load-bearing points below. The load-bearing points to preserve:
 
 - **eventTypeId hard-coded in the prompt** ("never ask the caller for it, never guess").
 - Never offer a time `calcom_get_available_slots` didn't return this call; wide-window checks (7+ days) for open-ended requests.

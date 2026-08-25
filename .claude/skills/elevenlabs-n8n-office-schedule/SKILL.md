@@ -22,7 +22,9 @@ anything.
    `node -e "console.log(new Date('2026-11-25T12:00:00Z').toLocaleDateString('en-US',{weekday:'long',timeZone:'UTC'}))"`
    Emitting an unverified weekday/date is the one unforgivable failure of
    this skill. (LLM date arithmetic being unreliable is the reason this
-   whole webhook exists — see C-023/C-024 in docs/cross-client-lessons.md.)
+   whole webhook exists — live probes showed LLM-evaluated edge conditions
+   ignore time and even bare boolean variables; see
+   docs/time-of-day-routing.md.)
 2. **Full-day closures** use the v1 `holiday_dates` format:
    `YYYY-MM-DD:Holiday Name` — comma-separated, no space after commas, no
    trailing comma. Names may contain spaces and parentheses, never commas

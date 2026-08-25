@@ -12,9 +12,10 @@ variables (including the finished greeting sentence); ElevenLabs substitutes
 them into the agent's first message and prompt.
 
 Why server-side? The agent's LLM must never do date/time arithmetic or
-open/closed reasoning — probes showed LLM-evaluated edge conditions ignore
-time and even bare boolean variables (candidates C-023/C-024 in
-[cross-client-lessons.md](cross-client-lessons.md)). The webhook computes;
+open/closed reasoning — controlled probes on a live build showed
+LLM-evaluated edge conditions ignore time and even bare boolean dynamic
+variables (among sibling edges, `edge_order` list position decides, in both
+directions). The webhook computes;
 the agent only renders. (`api/office-status.js` in this repo is the legacy
 single-client hardcoded version of the same idea; the n8n Data-Table
 workflow below is the current multi-client path.)
@@ -97,7 +98,8 @@ Status → Respond to Webhook**.
    that must never name a closure reason keeps `holiday_name` as
    awareness-only). Business logic for closed-hours behavior (message
    taking, routing) hangs off `{{is_open_hours}}` in prompt/procedure/node
-   free-text — **never in LLM edge conditions** (C-023/C-024).
+   free-text — **never in LLM edge conditions** (see the probe findings in
+   the intro: the transition evaluator ignores them).
 5. **Phone number assignment** decides which branch's config serves the
    call — test calls follow the number's assigned branch, so point the test
    number at the Sandbox branch while validating.
@@ -139,8 +141,8 @@ tree top-down; "the configs look the same" is not evidence — diff them.
    ElevenLabs rejected a good response (timeout or shape) — compare against
    a working agent's response. **No execution at all** → the request never
    arrived; go to 6.
-6. **The corrupt-agent-document case** (candidate C-028, learned the hard
-   way over several days): an agent minted by `POST /agents/create` with a
+6. **The corrupt-agent-document case** (learned the hard way over several
+   days): an agent minted by `POST /agents/create` with a
    full copied config can be invisibly broken for the telephony pipeline —
    every API read looks perfect and byte-identical to a working agent, but
    inbound calls fail 424 with the webhook request never leaving ElevenLabs.

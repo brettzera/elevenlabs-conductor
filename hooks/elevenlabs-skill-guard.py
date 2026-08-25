@@ -82,14 +82,17 @@ about not using the Agent/Task tool without being asked: for ElevenLabs work,
 Brett has already asked, permanently.
 
 House rules to honour even on a one-line change: stage every change on a
-Sandbox branch (never write to Main, never merge); read the client's
-feedback-ledger-*.md first — Staged/Reopened rows are constraints, and an
-instruction that looks like redundant duplication may be a deliberate
-defence-in-depth fix; treat `## Approved house lessons` in
-docs/cross-client-lessons.md as binding (candidates are signals only);
-ElevenLabs auth is the connector's MCP tools per docs/authentication.md —
-there is no API key: never ask for one, never store one, never fall back
-to curl.
+Sandbox branch (never write to Main, never merge); client memory lives in
+the client's folder — read `<client-folder>/CLAUDE.md` (the client-journey
+memory) and feedback-ledger-*.md first (Staged/Reopened rows are
+constraints, and an instruction that looks like redundant duplication may
+be a deliberate defence-in-depth fix), and update the CLAUDE.md at the end
+of the run; this repo's own files (docs/skills/agents/hooks) are
+Brett-gated — never edit them or open a PR, write proposed repo changes to
+<client-folder>/repo-change-proposals.md for the operator to send to
+Brett; ElevenLabs auth is the connector's MCP tools per
+docs/authentication.md — there is no API key: never ask for one, never
+store one, never fall back to curl.
 
 If a request genuinely falls outside the skills, say so and get Brett's
 agreement first — do not silently go direct."""

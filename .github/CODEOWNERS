@@ -1,5 +1,6 @@
 # Every change to this repo requires Brett's review — house docs, skills,
-# and agents are Brett-gated by design (see docs/cross-client-lessons.md).
+# and agents are Brett-gated by design: proposed repo changes are submitted
+# to Brett manually, and he applies and pushes them himself.
 #
 # To enforce mechanically: in GitHub repo settings, add branch protection on
 # `main` with "Require a pull request before merging" + "Require review from

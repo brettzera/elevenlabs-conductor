@@ -22,7 +22,7 @@ task, never secrets or client PII.
 | # | Connector tool | One-line note | Verification |
 |---|---|---|---|
 | 1 | `agents_create` | Create an agent. Compact fields: `name`, `first_message`, `language`, `prompt`, `voice_id`; anything else goes in `body` (the raw create-agent API body, whose sole required field is `conversation_config` — every sub-field below has a documented default). | Tool schema confirms the compact-field + `body` split; response shape **UNVERIFIED via connector — confirm on the first real create before relying on it**. |
-| 2 | `agents_get` | Read one agent's full config. Optional `branch_id` reads a specific branch; omitted = Main. Optional `version_id` reads a pinned version. | Underlying GET **VERIFIED LIVE** 2026-08-10 against `agent_2601ksq9frzye6b85fq3k94pdgfy` (CL-B) — full key shape confirmed (§2–§3). |
+| 2 | `agents_get` | Read one agent's full config. Optional `branch_id` reads a specific branch; omitted = Main. Optional `version_id` reads a pinned version. | Underlying GET **VERIFIED LIVE** 2026-08-10 against a production agent — full key shape confirmed (§2–§3). |
 | 3 | `agents_update` | Update an agent. Compact fields (`name`, `first_message`, `language`, `prompt`, `voice_id`) for the common cases; `body` mirrors the raw update shape (partial/deep-merge). `branch_id` targets a branch — **omitted defaults to Main**, so any write meant for Sandbox must carry it explicitly. `version_description` labels the minted version. | Tool schema confirms params; merge semantics match the house-pinned branch mechanics (confirmed live 2026-08-09). |
 | 4 | `agents_list` | List agents. Params: `page_size` (default 30, max 100), `search`, `archived`, `created_by_user_id` (`@me`), `sort_by`, `sort_direction`, `cursor`. | Underlying GET **VERIFIED LIVE** 2026-08-10 — `{agents, next_cursor, has_more}`. |
 | 5 | `agents_create_kb_text` | Create a KB doc from raw text. `body`: required `text`; optional `name`, `parent_folder_id`. | Docs/schema-verified; not exercised in the read-only pass. |
@@ -30,7 +30,7 @@ task, never secrets or client PII.
 | 7 | `agents_list_knowledge_base` | List KB docs (workspace-wide). Params: `page_size`, `search` (name prefix), `types` (`file`\|`url`\|`text`\|`folder`), `parent_folder_id`, `sort_by`, `cursor`. | Docs/schema-verified; not exercised. |
 | 8 | `agents_get_kb_document` | Get one KB doc's metadata (pass `documentation_id`). | Underlying GET **VERIFIED LIVE** 2026-08-10 — top-level keys confirmed: `id, name, metadata, supported_usages, access_info, folder_parent_id, folder_path, type, extracted_inner_html, content_format, filename, external_sync_info, auto_sync_info, refresh_status, is_frozen`. |
 | 9 | `agents_create_branch` | Create a branch. Required in practice: `name`, `description`, `parent_version_id` (**required — omitting it fails**, taken from the parent branch's `version_id`). Returns the created branch + version ids. | House-pinned, verified live by the architect skill's own build (2026-08-09) — cited, not re-derived here. |
-| 10 | `agents_list_branches` (`include_archived: true`) | List branches. **The flag is required** — without it, archived branches are hidden, and a merged Sandbox auto-archives (so an archived "Sandbox" silently disappears from the default list). | Underlying GET **VERIFIED LIVE** 2026-08-10 (CL-B) — per-branch fields include `id, name, description, is_archived, current_live_percentage, parent_branch_id, draft_exists, merged_into_branch_id`. The branch's own id field is `id` — it's what goes into the `branch_id` parameter on the other tools. |
+| 10 | `agents_list_branches` (`include_archived: true`) | List branches. **The flag is required** — without it, archived branches are hidden, and a merged Sandbox auto-archives (so an archived "Sandbox" silently disappears from the default list). | Underlying GET **VERIFIED LIVE** 2026-08-10 — per-branch fields include `id, name, description, is_archived, current_live_percentage, parent_branch_id, draft_exists, merged_into_branch_id`. The branch's own id field is `id` — it's what goes into the `branch_id` parameter on the other tools. |
 | 11 | `agents_update` with `branch_id` | Update a specific branch (same tool as #3, with the parameter). | Same as #3 — the `branch_id` parameter is what makes a write target Sandbox instead of Main. |
 
 Procedures are **not** reachable through the tools above — they are a
@@ -40,7 +40,7 @@ separate branch-scoped tool family with their own lifecycle. See §5.
 
 These are the fields a brand-new agent's first `agents_create` should carry,
 per the no-clone convention in §4. Field *paths* below are **VERIFIED LIVE**
-(confirmed present on a real agent's read, CL-B, 2026-08-10); default
+(confirmed present on a real agent's read, 2026-08-10); default
 *values* are either the documented API default or the house override — each
 labeled. `name`, `first_message`, `language`, and `voice_id` ride in the
 tool's compact parameters; everything else goes in `body` under
@@ -52,12 +52,12 @@ tool's compact parameters; everything else goes in `body` under
 | `first_message` | `conversation_config.agent.first_message` (compact param) | Draft per the house greeting shape in `docs/house-persona.md` — that section is currently `Status: unset`, so there is **no fixed house template string** yet; keep it one breath long per the latency playbook. Do not invent a greeting template the persona doc doesn't have. | Path verified live; content convention per `docs/house-persona.md` (unset). |
 | `language` | `conversation_config.agent.language` (compact param) | No house default is documented — `docs/house-persona.md` § Language defaults is `Status: unset`. API default is `en` if omitted. | Path verified live; house default unset — API default from docs. |
 | `voice_id` | `conversation_config.tts.voice_id` (compact param) | **TBD — no house-default voice pin.** Voice is chosen per client by `elevenlabs-voice-tts-configurator`; do not hardcode a voice id here or treat any client's current `voice_id` as a house default. Note: the compact param omitted, the workspace's standard ConvAI voice applies — still a per-client decision to revisit. | Path verified live. |
-| LLM | `conversation_config.agent.prompt.llm` (via `body`) | House primary: **an ElevenLabs-hosted Qwen model, non-thinking/instruct variant** (per `docs/latency-playbook.md`). The `agents_update`/`agents_create` schema's model enum lists the accepted id strings (e.g. `qwen3-30b-a3b` tier), but **deprecation status is invisible there** — per lesson C-008 hosted-Qwen ids go stale, so confirm the current id from a live agent's config before use. Fallback/backup: a flash-class model (e.g. `gemini-2.5-flash`) for `backup_llm_config`. | Path verified live (`agent.prompt.llm` and `agent.prompt.backup_llm_config` both present on CL-B). Exact current Qwen id UNVERIFIED. |
+| LLM | `conversation_config.agent.prompt.llm` (via `body`) | House primary: **an ElevenLabs-hosted Qwen model, non-thinking/instruct variant** (per `docs/latency-playbook.md`). The `agents_update`/`agents_create` schema's model enum lists the accepted id strings (e.g. `qwen3-30b-a3b` tier), but **deprecation status is invisible there** — hosted-Qwen ids have gone stale before (a cited house-primary id hit provider deprecation), so confirm the current id from a live agent's config before use. Fallback/backup: a flash-class model (e.g. `gemini-2.5-flash`) for `backup_llm_config`. | Path verified live (`agent.prompt.llm` and `agent.prompt.backup_llm_config` both present on a production agent). Exact current Qwen id UNVERIFIED. |
 | `temperature` | `conversation_config.agent.prompt.temperature` (via `body`) | House default per latency playbook: keep low for a voice agent's consistency; no single pinned number beyond "reasoning off" — inherit whatever the LLM-tuning configurator sets per its own defaults. API default if omitted: `0`. | Path verified live. |
 | `max_tokens` | `conversation_config.agent.prompt.max_tokens` (via `body`) | House default: **~300** (per `docs/latency-playbook.md` — caps response length, the single biggest hidden latency lever). API default if omitted: `-1` (uncapped). | Path verified live. |
-| ASR | `conversation_config.asr` (via `body`) | House posture: largely API-standard, not house-customized. **VERIFIED LIVE** on CL-B: `{quality: "high", provider: "scribe_realtime", user_input_audio_format: "pcm_16000", keywords: []}` — these match the documented create defaults, so a fresh build can rely on the API defaults here rather than setting ASR explicitly, unless a client needs custom `keywords`. | Path + values verified live; matches docs defaults. |
+| ASR | `conversation_config.asr` (via `body`) | House posture: largely API-standard, not house-customized. **VERIFIED LIVE** on a production agent: `{quality: "high", provider: "scribe_realtime", user_input_audio_format: "pcm_16000", keywords: []}` — these match the documented create defaults, so a fresh build can rely on the API defaults here rather than setting ASR explicitly, unless a client needs custom `keywords`. | Path + values verified live; matches docs defaults. |
 | TTS `model_id` | `conversation_config.tts.model_id` (via `body`) | House default: **`eleven_flash_v2_5`** (per `docs/latency-playbook.md` — Flash class for latency; ElevenLabs recommends Flash over Turbo). This **overrides** the raw API's own create default (`eleven_flash_v2`) — the house is deliberately pinning a newer Flash-class model, not accepting the bare API default. | Path verified live. House value from latency playbook. |
-| `tts.speed` | `conversation_config.tts.speed` (via `body`) | House default: `1.0` unless the client asked for a pace change (range `0.7`–`1.2`). This is a *pace* lever, not a latency lever — never used to "fix" lag. | Path verified live (a client-tuned value on CL-B is that client's choice, not the house default). |
+| `tts.speed` | `conversation_config.tts.speed` (via `body`) | House default: `1.0` unless the client asked for a pace change (range `0.7`–`1.2`). This is a *pace* lever, not a latency lever — never used to "fix" lag. | Path verified live (a client-tuned value on a production agent is that client's choice, not the house default). |
 
 ## 3. Knowledge-base attachment shape — VERIFIED LIVE
 
@@ -67,7 +67,7 @@ The array field that attaches a KB doc to an agent lives at:
 conversation_config.agent.prompt.knowledge_base   (array)
 ```
 
-Confirmed live 2026-08-10 (CL-B) — each entry is a flat object with exactly:
+Confirmed live 2026-08-10 — each entry is a flat object with exactly:
 
 ```json
 { "type": "file", "name": "<doc display name>", "id": "<kb-document-id>", "usage_mode": "prompt" }
@@ -93,7 +93,7 @@ RAG is a **separate** object, not part of the `knowledge_base` array entries:
 conversation_config.agent.prompt.rag   (object)
 ```
 
-Confirmed live 2026-08-10 (CL-B) — keys present: `enabled`,
+Confirmed live 2026-08-10 — keys present: `enabled`,
 `embedding_model` (e.g. `e5_mistral_7b_instruct`), `optional_rag_enabled`,
 `max_vector_distance`, `max_documents_length`, `max_retrieved_rag_chunks_count`,
 `num_candidates`, `query_rewrite_prompt_override`, `knowledge_base_tool_info`.
@@ -118,7 +118,7 @@ convention it is never the path for a new client build.)
 **Conflict resolved 2026-08-20 (Brett-approved):** `elevenlabs-architect`'s
 `SKILL.md` previously still said *"clone the MASTER TEMPLATE"* in its Golden
 rule 3 and its Guardrails recap, predating this convention. Both lines now
-state the build-fresh rule (HL-004) and match Phase 3 and this file.
+state the build-fresh rule and match Phase 3 and this file.
 
 ## 5. Procedures — branch-scoped tool family — VERIFIED LIVE
 

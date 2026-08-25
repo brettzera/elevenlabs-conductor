@@ -1,6 +1,6 @@
 # Workflow patterns — the topic web for multi-topic agents
 
-House default, approved by Brett 2026-08-08 after the reference client's (CL-A)
+House default, approved by Brett 2026-08-08 after a live client's
 intent-routing overhaul.
 
 > **Calling-surface note (2026-08-24):** the API mechanics pinned in this
@@ -11,8 +11,8 @@ intent-routing overhaul.
 > behaviors). Auth is the connector — no API key (`docs/authentication.md`). When a client wants an agent that performs
 **several distinct actions** (report an issue, book a meeting, reach a
 human, …), wire the workflow as a **topic web**, not a hub-and-spoke with
-backward edges. Reference implementation: the CL-A build, Main
-(`agent_5501kx7g6fhmeky83hsgebetmv2d`) — 7 nodes, 11 edges.
+backward edges. The proven reference implementation is a live production
+build (7 nodes, 11 edges); its ids live in that client's folder, not here.
 
 ## The pattern
 
@@ -43,8 +43,8 @@ start → Triage ──→ Topic A ⇄ Topic B          (direct leaf↔leaf edge
    "booking action complete") AND the caller states the new intent. This
    stops mid-task topic drift while keeping multi-request calls fluid.
 5. **The graph, not the LLM, executes the exits.** Terminal actions get
-   dedicated nodes so they cannot be claimed-but-not-performed (the FB-005
-   failure class):
+   dedicated nodes so they cannot be claimed-but-not-performed (a
+   claimed-but-never-executed exit was a logged live failure class):
    - **Wrap-up:** an `end`-type node with completion-gated edges from
      triage (wrong number / "never mind") and every task leaf ("nothing
      else needed"). Keep the `end_call` system tool enabled as a fallback
@@ -55,20 +55,20 @@ start → Triage ──→ Topic A ⇄ Topic B          (direct leaf↔leaf edge
      caller's last utterance — the line goes dead with no sign-off, even
      when the global prompt has a perfectly good closing section that is
      simply never reachable. Callers experience this as being hung up on
-     mid-conversation. Two clients have now hit it (CL-C FB-002, CL-D
-     FB-001), the second on 4/4 calls in a test batch across every
-     wrap-up route, so treat "leaf edge → bare end node" as a defect on
-     sight, not an edge case. The fix that belongs here is rule 7's:
-     the sign-off rides the SOURCE agent node's prompt, which is already
-     rendering a turn. Inserting a **dedicated closing node** between the
-     leaves and the terminal node is the tempting alternative — it states
-     the trigger once instead of once per leaf — but CL-C recorded it
-     failing in both available forms (an unconditional outbound edge
-     generated no turn at all; a trivially-true LLM-conditioned one
-     generated a turn but filled it from elsewhere in the graph and made
-     the exit non-deterministic). A completion-worded LLM condition on
-     that edge is a third variant, currently staged but unproven at
-     CL-D — do not adopt it as a pattern until simulation evidence exists.
+     mid-conversation. Two separate client builds have hit it (one on 4/4
+     calls in a test batch across every wrap-up route), so treat "leaf
+     edge → bare end node" as a defect on sight, not an edge case. The
+     fix that belongs here is rule 7's: the sign-off rides the SOURCE
+     agent node's prompt, which is already rendering a turn. Inserting a
+     **dedicated closing node** between the leaves and the terminal node
+     is the tempting alternative — it states the trigger once instead of
+     once per leaf — but live builds recorded it failing in both
+     available forms (an unconditional outbound edge generated no turn at
+     all; a trivially-true LLM-conditioned one generated a turn but
+     filled it from elsewhere in the graph and made the exit
+     non-deterministic). A completion-worded LLM condition on that edge
+     is a third variant that has been staged but not proven — do not
+     adopt it as a pattern until simulation evidence exists.
    - **Transfer:** a `phone_number`-type node downstream of the escalation
      agent node, entered via an edge gated on the intake being complete
      (e.g. "name AND account both collected — items gathered earlier in
@@ -86,7 +86,7 @@ start → Triage ──→ Topic A ⇄ Topic B          (direct leaf↔leaf edge
    tool". Sign-off and handoff wording lives in the SOURCE agent node's
    prompt (terminal node types can't carry any — see schema pins below).
 
-## Surface ownership — the three-layer text architecture (HL-003)
+## Surface ownership — the three-layer text architecture
 
 House default (approved by Brett 2026-08-09) for **every agent that has a
 workflow**. Each instruction lives on exactly one of three surfaces:
@@ -117,8 +117,8 @@ Rules of the architecture:
 2. **Single-sourcing.** An instruction exists on one surface only; restating
    a global rule in a node, or a node contract in a procedure, is the
    prompt-bloat failure this rule kills. The ONE sanctioned exception is
-   deliberate defence-in-depth backed by a feedback-ledger row (the FB-011
-   lesson) — cited, never silent.
+   deliberate defence-in-depth backed by a feedback-ledger row in the
+   client's folder — cited, never silent.
 3. **Anti-hallucination tool contracts live at the node** that owns the
    tool ("nothing is booked until `<tool>` returned success — never say
    it before"), stated once at full strength.
@@ -129,7 +129,7 @@ Rules of the architecture:
    live on the reference agent).
 5. **Every path that collects anything names a procedure** — even a
    two-item transfer intake gets one, so the architecture stays uniform.
-6. **Collected once, never re-asked (HL-005).** Any item the caller has
+6. **Collected once, never re-asked (the carried-info rule).** Any item the caller has
    already provided in this call is never asked for again by a later step,
    path, or procedure — the agent repeats what it has and asks the caller
    to confirm it is still correct ("I have your name as Jane Smith — is
@@ -146,8 +146,8 @@ Rules of the architecture:
    holds text a node or procedure should own — treat that as the
    analyzer's prompt-bloat red flag.
 
-Reference implementation: CL-A, branch "Sandbox -
-Workflow-led prompt strip" (`agtbrch_3401kzj7kdv0fcpv0n02ajgt8db8`).
+The proven reference implementation is a live production branch; its ids
+live in that client's folder, not here.
 
 ## When the web applies — and when it doesn't
 
