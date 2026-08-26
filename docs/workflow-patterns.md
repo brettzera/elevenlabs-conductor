@@ -38,10 +38,15 @@ start → Triage ──→ Topic A ⇄ Topic B          (direct leaf↔leaf edge
    edges fire on an explicit "get me a person" at ANY point — never require
    the current task to be finished first. The caller asking for a human is
    by definition losing patience; that path must be the shortest.
-4. **Task → task edges are completion-gated.** Leaf → leaf edges fire only
-   when the current task is done (e.g. "summary read back and confirmed" /
-   "booking action complete") AND the caller states the new intent. This
-   stops mid-task topic drift while keeping multi-request calls fluid.
+4. **Task → task edges are completion-gated — against the procedure.**
+   Leaf → leaf edges fire only when the current path's procedure is done
+   AND the caller has THEN, in their own turn, stated the new intent.
+   Phrase the gate against the procedure, not re-described content: "the
+   <X> intake on this path is complete — <observable signal> — and the
+   caller has THEN …", with a "does not apply before the <X> intake is
+   substantially complete" exclusion (§ Edges follow procedure endings).
+   This stops mid-task topic drift while keeping multi-request calls
+   fluid.
 5. **The graph, not the LLM, executes the exits.** Terminal actions get
    dedicated nodes so they cannot be claimed-but-not-performed (a
    claimed-but-never-executed exit was a logged live failure class):
@@ -67,8 +72,10 @@ start → Triage ──→ Topic A ⇄ Topic B          (direct leaf↔leaf edge
      all; a trivially-true LLM-conditioned one generated a turn but
      filled it from elsewhere in the graph and made the exit
      non-deterministic). A completion-worded LLM condition on that edge
-     is a third variant that has been staged but not proven — do not
-     adopt it as a pattern until simulation evidence exists.
+     is the third variant — **adopted as house style by Brett 2026-08-26**
+     from the Litster Frost v2 build, with the condition keyed to the
+     PROCEDURE's ending plus one observable signal, never to vague
+     content (§ Edges follow procedure endings).
    - **Transfer:** a `phone_number`-type node downstream of the escalation
      agent node, entered via an edge gated on the intake being complete
      (e.g. "name AND account both collected — items gathered earlier in
@@ -94,7 +101,7 @@ workflow**. Each instruction lives on exactly one of three surfaces:
 | Surface | Owns | Never carries |
 |---|---|---|
 | **Global prompt** | Persona · universal speech/capture rules · universal hard rules · closing · the workflow pointer | Path-specific logic, question lists, tool mechanics |
-| **Workflow node** | One-line path framing · path boundaries ("nothing outside the procedure is asked here") · topic-wide tool contracts · **"Run the procedure: <name>"** | Granular question ordering, restated universal rules |
+| **Workflow node** | The three-clause invocation (§ The subagent-node template): **"Call start_procedure first. Run the procedure: <name>. Nothing outside the procedure is asked here."** · topic-wide tool contracts, only where the node owns a tool | Path-framing essays (the node LABEL names the path), granular question ordering, business facts, restated universal rules |
 | **Procedure** | The ordered granular questioning — "Ask for the following one at a time, in order", one ask per numbered step, bare-action steps | Routing, tool contracts, restated global/node rules |
 
 (Amended 2026-08-20, Brett-approved: the global prompt's persona paragraph
@@ -148,6 +155,69 @@ Rules of the architecture:
 
 The proven reference implementation is a live production branch; its ids
 live in that client's folder, not here.
+
+## The subagent-node template (Brett, 2026-08-26)
+
+House default for every procedure-owning subagent node, taken verbatim
+from the Litster Frost v2 build (its `node_injury` / "New injury intake"
+pairing; the full extraction lives in that client's folder). The node's
+ENTIRE instruction text is three clauses:
+
+> Call start_procedure first. Run the procedure: <exact procedure name>.
+> Nothing outside the procedure is asked here.
+
+That's 16 words on the exemplar. Rules:
+
+1. **Word budget.** The three-clause form is the target (~12–20 words).
+   Anything past ~40 words means the node is carrying content another
+   surface owns — relocate it (questioning → procedure, universals →
+   global prompt, facts → KB). The ONLY sanctioned addition is a
+   topic-wide tool contract on a node that owns a tool, stated once at
+   full strength (Surface-ownership rule 3).
+2. **Deterministic by construction, not by emphasis.** The determinism
+   comes from the closed loop, not from adding words: the node names the
+   procedure by its exact registered name, and the procedure's `trigger`
+   is anchored back to that one node ("Use this procedure when the
+   conversation has reached the <X> step (<node_id>). Does not apply to
+   any other step."). The scope-closer ("Nothing outside the procedure is
+   asked here.") removes the model's only alternative to starting the
+   procedure. Never restate, paraphrase, or duplicate any procedure step
+   at the node — every extra sentence is a competing instruction that
+   makes the procedure LESS certain to run.
+3. **Path framing lives in the node label**, not the prompt text — the
+   label ("New injury / accident intake") is what edges and triggers
+   reference; the prompt spends no words on it.
+4. **Node config stays inherited.** Leave the node's `conversation_config`
+   fields `null` (inherit branch defaults) except a deliberate, named
+   override (e.g. a per-node LLM pin); no node-level `tool_ids` /
+   `additional_knowledge_base` unless the node genuinely owns them.
+
+## Edges follow procedure endings (Brett, 2026-08-26)
+
+Edge conditions off a procedure-owning node are phrased against the
+PROCEDURE's ending — never against re-described conversational content.
+Three tiers, from the same exemplar:
+
+1. **Exit edge (path done → closing/wrap-up):** keyed explicitly to the
+   procedure plus ONE observable signal from its final steps —
+   > The <name> procedure is complete — contact details captured — and
+   > the caller has confirmed the details are correct.
+   The signal must be something the procedure's own closing steps
+   produce (read-back confirmed, message taken), so drafting the
+   procedure's ending and this condition is ONE coordinated act — the
+   procedures configurator names the completion signal; the flow
+   configurator keys the edge to it.
+2. **Lateral task → task edges:** interrupt-gated on the procedure —
+   "the <X> intake on this path is complete/substantially complete — and
+   the caller has THEN, in their own turn, raised <new topic>", with an
+   explicit "does not apply before the <X> intake is substantially
+   complete" exclusion. The procedure is protected from mid-flow
+   abandonment.
+3. **The privileged content-immediate edge:** exactly one class of edge
+   may ignore an unfinished procedure — the escalation/named-person
+   route — and it must SAY so: "This applies immediately, whether or not
+   the <X> intake is finished." Any other content-immediate edge off a
+   procedure-owning node is a defect.
 
 ## When the web applies — and when it doesn't
 
