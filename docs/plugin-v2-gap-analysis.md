@@ -1,14 +1,14 @@
 # elevenlabs-conductor — gap analysis for the phmg-elevenlabs plugin (v2)
 
 Scan date: 2026-09-08. Source: `brettzera/elevenlabs-conductor` at commit
+`a5c6369` (41 files, ~3 950 lines). Method: every file read; connector tool
+schemas read live from the session; ElevenLabs docs and 2026 changelog
+digested (`docs/reference/elevenlabs-docs-digest.md`).
 
 > Delivered by the v2 plugin build (repo `elevenlabs-plugin-v2`, branch
 > `claude/elevenlabs-agent-plugin-r63ryl`). This copy lives next to the repo it
 > scans; the canonical file is `docs/conductor-gap-analysis.md` in the plugin.
 > Brett requested the scan; nothing else in this repo was changed.
-`a5c6369` (41 files, ~3 950 lines). Method: every file read; connector tool
-schemas read live from the session; ElevenLabs docs and 2026 changelog
-digested (`docs/reference/elevenlabs-docs-digest.md`).
 
 Verdict in one line: the conductor's *discipline* (Sandbox-first, one agent
 at a time, read-only vs write rosters, client memory in the client folder,
